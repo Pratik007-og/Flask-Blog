@@ -1,6 +1,9 @@
+from collections.abc import Sequence
+from typing import Any, Mapping
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, EqualTo
+from flaskblog.models import User, Post
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
@@ -17,6 +20,16 @@ class RegistrationForm(FlaskForm):
         EqualTo('password')
     ])
     submit = SubmitField('Sign Up')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('This username is taken, please choose a different one')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('This email is taken, please choose a different one')
 
 
 class LoginForm(FlaskForm):
